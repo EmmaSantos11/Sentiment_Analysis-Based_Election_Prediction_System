@@ -1,0 +1,24 @@
+# Ignore virtual environments
+new_env/
+pand/
+
+# Ignore other unnecessary files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.env
+*.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore CSVs or other data files if not needed in the repository
+*.csv
+
+# Ignore secrets
+secrets.toml
+
