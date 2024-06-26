@@ -229,7 +229,7 @@ def plot_candidate_sentiment_distribution(candidate):
 def main():
     st.title("Sentiment Analysis-Based Election Prediction System")
 
-    menu = ["Add Candidates", "Add Comment", "View Comments", "Sentiment Analysis", "Data Management", "Twitter Data"]
+    menu = ["Add Candidates", "Add Comment", "View Comments", "Sentiment & Predictive Analysis", "Data Management", "Twitter Data"]
     choice = st.sidebar.selectbox("Menu", menu)
 
     if choice == "Add Candidates":
