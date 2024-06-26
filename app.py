@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import tweepy
 import toml
+from textblob import TextBlob
 
 # Initialize sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -174,12 +175,55 @@ def get_tweets(candidate_name, count=100):
 
     auth = tweepy.OAuthHandler(api_key, api_secret_key)
     auth.set_access_token(access_token, access_token_secret)
-    api = tweepy.API(auth)
+    api = tweepy.API(auth, wait_on_rate_limit=True)
 
     tweets = []
-    for tweet in tweepy.Cursor(api.search, q=candidate_name, lang='en', tweet_mode='extended').items(count):
-        tweets.append(tweet.full_text)
+    try:
+        for tweet in tweepy.Cursor(api.search_tweets, q=candidate_name, lang='en', tweet_mode='extended').items(count):
+            tweets.append(tweet.full_text)
+    except Exception as e:
+        print(f"Error fetching tweets: {e}")
+
     return tweets
+
+# Fuction to print word cloud for fetched tweets
+def plot_wordcloud(candidate_name):
+    tweets = get_tweets(candidate_name)
+    if not tweets:
+        print("No tweets found for the candidate.")
+        return
+
+    text = " ".join(tweets)
+    if not text.strip():
+        print("No text found in tweets.")
+        return
+
+    wordcloud = WordCloud(background_color='white').generate(text)
+    plt.figure(figsize=(10, 8))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+    plt.show()
+
+# Function to plut candidate sentiment distribution from tweets
+def plot_candidate_sentiment_distribution(candidate):
+    tweets = get_tweets(candidate)
+    if not tweets:
+        print("No tweets found for the candidate.")
+        return
+
+    # Perform sentiment analysis and prepare data
+    sentiments = analyze_sentiments(tweets)  # Assuming you have a function for sentiment analysis
+
+    if sentiments.empty:
+        print("No sentiments data available.")
+        return
+
+    # Plotting
+    sentiments.plot(kind='bar', color=['green', 'blue', 'red'])
+    plt.xlabel('Sentiment')
+    plt.ylabel('Count')
+    plt.title(f'Sentiment Distribution for {candidate}')
+    plt.show()
 
 # Streamlit app function
 def main():
