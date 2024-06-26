@@ -264,8 +264,8 @@ def main():
         else:
             st.warning("Please add candidates first.")
 
-    elif choice == "Sentiment Analysis":
-        st.subheader("Sentiment Analysis")
+    elif choice == "Sentiment & Predictive Analysis":
+        st.subheader("Sentiment & Predictive Analysis")
 
         if st.button("Run Sentiment Analysis"):
             plot_sentiment_distribution()
