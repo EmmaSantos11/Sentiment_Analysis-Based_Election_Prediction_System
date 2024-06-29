@@ -6,6 +6,12 @@ from wordcloud import WordCloud
 import tweepy
 import toml
 from textblob import TextBlob
+from nltk.corpus import stopwords
+import string
+
+# Initialize session state
+if 'comments_df' not in st.session_state:
+    st.session_state['comments_df'] = pd.DataFrame(columns=['candidate', 'comment'])
 
 # Initialize sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -225,6 +231,26 @@ def plot_candidate_sentiment_distribution(candidate):
     plt.title(f'Sentiment Distribution for {candidate}')
     plt.show()
 
+# Function to preprocess text
+def preprocess_text(text):
+    stop_words = set(stopwords.words('english'))
+    text = text.lower()
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    words = text.split()
+    words = [word for word in words if word not in stop_words]
+    return ' '.join(words)
+
+# Function to generate word cloud
+def generate_word_cloud(text, title):
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.title(title, fontsize=20)
+    plt.show()
+    st.pyplot(plt)
+
+
 # Streamlit app function
 def main():
     st.title("Sentiment Analysis-Based Election Prediction System")
@@ -275,7 +301,12 @@ def main():
             if 'candidates' in st.session_state:
                 for candidate in st.session_state['candidates']:
                     st.write(f"Word Cloud for {candidate}")
-                    plot_wordcloud(candidate)
+                    candidate_comments = st.session_state['comments_df'][st.session_state['comments_df']['Candidate'] == candidate]['Comment']
+                    if not candidate_comments.empty:
+                        candidate_text = ' '.join([preprocess_text(comment) for comment in candidate_comments])
+                        generate_word_cloud(candidate_text, f'Word Cloud for {candidate}')
+                    else:
+                        st.write(f"No comments for {candidate}")
 
             st.subheader("Overall Sentiment Statistics")
             positive, neutral, negative = total_positive_neutral_negative_comments()
@@ -328,7 +359,7 @@ def main():
                 for tweet in tweets:
                     sentiment, sentiment_score = analyze_sentiment(tweet)
                     add_comment(candidate, tweet, sentiment, sentiment_score)
-                st.success("Tweets fetched and analyzed successfully.")
+                st.success("Tweets fetched.")
         else:
             st.warning("Please add candidates first.")
 
